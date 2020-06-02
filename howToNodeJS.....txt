@@ -1,0 +1,274 @@
+1. Usually the basic file on which the app is hosted is named as "App.js" or "server.js"
+2. 'http' and 'https' are the basic core modules that help us with requests.
+	- 'https' is used to launch a ssl server.
+	- 'http' helps us with launching a server, and to send requests to another server
+		+ we can have multiple servers communicating with each other.
+			-> Example: we can use http to send a requests containing coordinates to google map api and get an address.
+		+ to use http, we should first import it like this;
+			-> const http = require('http')
+				--> require(path) is the method through which we import stuff in node js.
+				--> we can name it anythig, but typically we name it as http(module that we are importing)
+				--> .require(path). here the path to our code module http is 'http'. If its a path to you own file, we do './<path/filename>'
+					---> adding './' at the beginning will look for local files.
+					---> ommiting it like requests('http') will look for a global module.
+		+ we create a server with http.createServer(requestlistener). This should be stored in a variable(typically called as server)
+			-> A request listener is a function that executes for every request that comes.
+			-> we can either create a seperate function like:
+				--> const rqListener = (req, res)=> {
+														console.log("executed!!");
+													};
+				--> or const server = http.createServer((req,res)=> {
+																console.log(req);
+																	});
+			-> The req and res stands for request and response. These are 2 arguments that a request listener takes.
+		+ In order for the server to listen to the requests, we should say: server.listen(3000).
+			-> The 3000 is a port number. we can use any port number here.
+			-> The listen() function also takes a host name. The default name is Localhost.
+			-> At this point, we can run the code. Notice that the code does not end in the terminal because its continuesly listening to requests.
+			-> we can open a browser and go to localhost:3000 to see what is happening.
+
+3. Node JS lifecycle and event loop:
+	-  The event loop is a noe program that keeps on running as long as there are registered servers to listen to requests.
+	-  Therefore our entire code is managed by this event loop. Node js uses this kind of event driven loop.
+	-  In order to quit the server, we should say process.exit() inside the requestlistener function. But, typically we do not do this as we want tour server to be up all the time.
+
+4. The request object:
+	- The request object is is the object that nodejs received when we went to localhost:3000 from the browser.
+	- The request object is a very compliacted object with lots of fields which contain both methods and data.
+	- The three important things are url, method and headers. We can get these by:
+		+ req.method, req.url, req.headers since our variable for request is req in the request listener.
+
+5. The response: (res is the variable name in the requestlistener)
+	- We can set the header through res.setHeader('key','value') --> res.setHeader('Content-Type', 'text/html');
+	- We can send a response through res.write('html code').
+	- So the requestlistener can look like this:
+		+ const requestlistener = (req, res) => {
+											console.log(req.url, req.method, req.headers)
+											res.setHeader('Content-Type', 'text/html');
+											res.write('<html>')
+											res.write('<head><title>This is stupidest way to send html response</title></head>')
+											res.write('<body><h1>I am a stupid response</h1></body>')
+											res.write('</html>')
+											res.end()
+	}
+	- This is not the ideal way to write html code. But for now, this will do.
+	- customizing response:
+		+ we can send a custom response based on the url entered:
+			-> First, we get the url through res.url, then, based on the url, we can send an appropriate html code:
+				--> const rqListener = (req, res)=> {
+													// this just logs these fields
+													// console.log(req.url, req.method, req.headers);
+													// when the user visits the localhost:3000/, this is what happens
+													const myurl = req.url;
+													console.log(myurl);
+													//This will be true only if the url is a string and if it is equal to a slash
+													if (myurl === '/') {
+														res.write('<html>');
+														res.write('<head><title>form</title></head>');
+														res.write('<body><form method="POST" action="/message"><label for="message">Your Message: </label><input type="text" name="message"><button type="submit" value="submit">Send</button></body>');
+														res.write('</html>');
+														// This is not actually required to return res.end()
+														// But, doing so will make sure the code that comes after is not executed
+														// Also because no code should come after res.end(). if we dont return, the execution will continue and cause an error
+														return res.end();
+													}
+													res.setHeader('Content-Type', 'text/html');
+													res.write('<html>');
+													res.write('<head><title>This is stupidest way to send html response</title></head>');
+													res.write('<body><h1>I am a stupid response</h1></body>');
+													res.write('</html>');
+													res.end();
+													// this is to quit the server. But we dont want to do this as we want our server to be up all the time
+													// process.exit();
+												};
+
+	
+	- Redirecting response:
+		+ now we want to parse the data that user sensd and store it in a file. The data is obtained from the form that we created before. This was also made to changes the url headeer.
+		+ We also want to do this only if the request is a post request.
+		+ so first, we add an if statement that confirms if we the request is post and if we are in a aspecified url.
+		+ To save the message in a file, we need to import the file system module - fs: rquire('fs').
+		+ we will use the fs.writeFileSync('filename', 'text').
+		+ res.statusCode is set to 302 as this is the default status code for redirect
+		+ The redirected url is also set by setHeader('location', '/') --> here, location is teh current location or the current url
+		+ The entire if block is written as follows:
+			    if (myurl === '/message' && method === 'POST') {
+					fs.writeFileSync('message.txt', 'Dummy');
+					res.statusCode = 302; //status code for redirect
+					res.setHeader('Location', '/'); //this 'location' is also default http stuff. setHeader is the general way to redirect
+					return res.end(); //It is important to do this to avoid executing the code below
+				}
+																
+		+ But now, how do we store a custom message inside message.txt instead of a hardcoded message?
+			-> First, we need to get the data from the post request. We had already designed a form that takes a text input. This post request is actually captured in the request object(here it is 'req').
+			-> This input data is first converted into a 'stream'. Nodejs processes this stream of data in multiple 'chunks'. (this is especially important if the data is large, such as a file)
+			-> Therefore, we need a function to get the stream of chunks of data.
+				--> we will create an array to store the body of the data, and use the req.on() method to operate on the request. The .on method takes in 2 arguments - an event, and a function(i.e event handler)
+					---> const body = [];
+						req.on('data',(chunk) => {
+						body.push(chunk);
+						console.log('chunk');
+						});
+				--> Now this body array has the stream of data which is not buffered. So we need to parse this data with another .on function. But this time, the event is 'end'.
+				--> Here, we know that the chunks are texts, so we are using the toString() function. If its not text, we need to handle it differently.
+				--> Since the 'name' property of the textbox is 'message', the parsed body of the message will contain "message=<whatever we enter in the textbox>". So we will split that by '=' and just get the second element from the array.
+					---> req.on('end', () => {
+					const parsedBody = buffer.concat(body).toString();
+					const message = parsedBody.split('=')[1];
+					fs.writeFileSync('message.txt', message);
+					});
+		
+		+ So the entire code bokck looks like this:
+			    if (myurl === '/message' && method === 'POST') {
+					// create an array to store the chunks of data stream
+					const body = [];
+					// operate on the chunks with request's .on method
+					req.on('data', (chunk) => {
+						console.log(chunk);
+						body.push(chunk);
+					});
+					// concatinate all the chunks with the Buffer object and extract the message
+					req.on('end', () => { 
+						console.log();
+						const parsedBody = Buffer.concat(body).toString();
+						const message = parsedBody.split('=')[1];
+						fs.writeFileSync('message.txt', message);
+					});        
+					res.statusCode = 302; //status code for redirect
+					res.setHeader('Location', '/'); //this 'location' is also default http stuff. setHeader is the general way to redirect
+					return res.end(); //It is important to do this to avoid executing the code below
+				}
+				
+5. Asynchronous Execution:
+	- Node js executes codes asynchronously.
+	- Especially for funcrtions such as the request listener which has functions within functions.
+	- The req.on('end') will be queued until an end event is encountered. This will happen to all such requests and an internal registry of sorts will be maintained.
+	- This is essential because sequential execution will slow the system down.
+	- So in the above code, the res.statusCode and res.setHeader might get executed before the res.on('end'). This is ok as long as whatever happens within the res.on('end') does not have an effect on whatever that comes after the end event.
+	- But in case this has an effect, we should put the code that comes after the req.on('end') event inside the end event itself.
+	- Another solution is to have the execution return this end event. like this:
+		    if (myurl === '/message' && method === 'POST') {
+				// create an array to store the chunks of data stream
+				const body = [];
+				// operate on the chunks with request's .on method
+				req.on('data', (chunk) => {
+					console.log(chunk);
+					body.push(chunk);
+				});
+				// concatinate all the chunks with the Buffer object and extract the message
+				return req.on('end', () => { 
+						console.log();
+						const parsedBody = Buffer.concat(body).toString();
+						const message = parsedBody.split('=')[1];
+						fs.writeFileSync('message.txt', message);
+						res.statusCode = 302; //status code for redirect
+						res.setHeader('Location', '/'); //this 'location' is also default http stuff. setHeader is the general way to redirect
+						return res.end(); //It is important to do this to avoid executing the code below
+				});        
+				
+			}
+    
+
+6. fs.writeFileSync() prevents asynchronous execution.
+	- This means until, the file is read and parsed, the other requests will not be processed by the system.
+	- Therefore, we can use the writeFile() function. 
+	- But this function takes a callback function to handle errors if any.
+		+ fs.writeFile('message.txt', msg, err =>{
+                res.statusCode = 302; //redirect
+                res.setHeader('Location', '/'); //redirect to '/'
+                return res.end();
+            });
+			
+7. custom scripts: 
+	- we can add names to run scripts instead of using npm App.js.
+	- This can be donw by creating a package.json file.
+	- To create a packaga.json file, we should navigate to the location of the project in terminal and run "npm init"
+	- This will ask a few questions for which we should give answers. It will then create a package.json file in our project folder.
+	- In the package.json file, we can modify the scripts object to add custom  names and the scripts as key value pairs.
+		+ "sripts": {
+					"test": "echo \"Error: no test specified\" && exit 1",
+					"start": "node app.js",
+					"<my custom name>": "node app.js"
+				  },
+	- Now we can use "npm run <my custom name>" in the cmd line to run the particular script.
+
+8. styling:
+	- Dynamic styling is about changing the styles of elements on the go. This is possible because the html(jsx) and css style used inside the App.js file is actually javascript.
+		+ this is done by first setting up a style object/objects inside the render function.
+			    const style = {
+				  backgroundColor: 'green',
+				  color: 'white',
+				  font: 'inherit',
+				  border: '1px solid blue',
+				  padding: '8px',
+				  curson: 'pointer',
+				  ':hover': {
+					backgroundColor: 'lightgreen',
+					color: 'black'
+				  }
+				};
+			-> This object is then referenced inside a JSX element inside the {}.
+				<button onClick = {this.showComponents} style={style}>Show Components</button>
+			-> This means that whenever this particular event is encountered, the style object gets changed therby changing the css style.
+		
+		+ Changing styles based on conditions and states:
+			-> Suppose we want to changge the styling of a p tag based on the state(here, say we want to change the font weight based on the number items in person array)
+			-> We first create classes in the App.css file, such as :
+				--> .red{
+						  color: red;
+						}
+
+						.bold {
+						  font-weight: bold;
+						}
+			-> We then create an array to hold the class names inside the render function.
+				--> const classes = [];
+			-> We then add if confitions:
+				-->if(this.state.persons.length ==2 ) {
+					  classes.push("red");
+					  style.backgroundColor='red';
+					  style[':hover'] = {
+						backgroundColor: 'salmon',
+						color: 'black'}
+					}
+				-->if(this.state.persons.length <=1 ) {
+					  classes.push("bold");
+					  style.backgroundColor='red';
+					  style[':hover'] = {
+						backgroundColor: 'salmon',
+						color: 'black'}
+					}
+			-> Here, the classes array will contain separate items when pushed but we want a single string as a class so that it is refers back to the classes created in the App.css file.
+				--> we can accomplish this by: <p className={classes.join(' ')}>This is really working!</p>
+			-> Now this p tag will change style everytime a specified condition is satisfied.
+		
+		+ Using radium for media queries:
+			-> Basiclly we can add media queries in our css file like this:
+				@media (condition) {
+					.person {
+						width: 450px;
+					}
+				}
+			-> But we can do this more effeciently with the radium package.
+				--> To install radium, execute "npm install radium --save". You should seea  package-lock.json file in the project.
+				--> Then import it in the required files(App.js/Person.js etc..) by "import Radium, { StyleRoot } from 'radium' ".
+					---> We then create a style object in the component's file/main file/indide the component function (wherever we need):
+						const style =  {
+							'@media (min-width: 500px)': {
+								width: '450px'
+							}};
+					---> Once this is done, we should reference this as a jsx property:
+						<div className="Person" style={style}> stuff... </div>
+					---> The '@media...' is wrapped inside a quotes because everything in react is javascript, and therefore not wrapping the css syntax with '' makes it an invalid js code.
+				--> The StyleRoot package is something that we need for media queries.
+				--> We then wrap the entire contents of the return statement of the render method in the main App.js inside the StyleRoot tag:
+					render(
+						return(
+							<StyleRoot>
+								stuff...
+							</StyleRoot>
+						)
+					)
+				--> we definately have to wrap the exports of each file with Radium if radium is used in that file:
+					--> export default Radium(Person);
+					--> export default Radium(App);

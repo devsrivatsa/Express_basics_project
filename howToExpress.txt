@@ -1,0 +1,23 @@
+1. Express is installer with "npm install --save express". Once installed, it will reflect in the dependencies.
+2. We import express with "const express = require('express')".
+3. Once imported, we store it in a "const app = express()". It is a function call.
+4. In order to configure routes, we can use the "use" method.
+	- The "use" method facilitates middleware functions.
+	- The use method takes 3 arguments: request object, response object, next function. 
+	- Midlewares are just functions that should be executed with the specified path is encountered.
+	- It funels the request to the next function when the next method is used. However, when the next function is not used, it the funneling ends.
+	- app.use(path, (req, res, next).
+	- The app.listen(port) can also be used to listen to requests instead of creating a server object and making it listen to request.
+	- app.use('/',(req, res, next) => {
+			console.log('In yet another middleware');
+			res.send("<h1>Hello From the / page</h1>")
+		});
+5. The res.send(html) can be used to send html content as a response of visiting the path. 
+	- In the above function, the path is "/"
+
+6. The order in which we place the "use" function is very important.
+	- the use function with path "\products\beauty\hair\set-wet" should come before the function with the path "\products\beauty\hair".
+	- similarly "\products\beauty\hair" before "\products\beauty".
+	- the midleware with "\" for the path should be the last function.
+
+7. It is better to compartmentalize the app.

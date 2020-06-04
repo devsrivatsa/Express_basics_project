@@ -1,11 +1,21 @@
-const http = require('http');
-const routes = require('./routes');
+var express = require('express');
+var bodyparser = require('body-parser');
+const adminRoutes = require('./routes/admin');
+const shopRoute = require('./routes/shop');
 
-// create a server; createServer takes in a request listener
-const server = http.createServer(routes);
+var app = express()
 
-// nodejs will keep this running to listen to incomming requests
-server.listen(3000);
+// body parser must come before all the other middleware
+app.use(bodyparser.urlencoded({extended: false}));
 
-//-----------------At this point, we can run the code to see whats happening...................................
-/////////////////// in the browser(go to localhost:3000)//////////////////////////////////////////////
+// filtering the path with the /admin
+app.use('/admin', adminRoutes); //without the function call t0 adminRoutes but again order matters
+app.use(shopRoute);
+
+// to send a 404 error we use res.status
+app.use((req, res, next)=>{
+    res.status(404).send('<h1>Page Not Found Man</h1>')
+});
+
+
+app.listen(3000);

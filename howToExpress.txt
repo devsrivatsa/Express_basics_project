@@ -19,5 +19,23 @@
 	- the use function with path "\products\beauty\hair\set-wet" should come before the function with the path "\products\beauty\hair".
 	- similarly "\products\beauty\hair" before "\products\beauty".
 	- the midleware with "\" for the path should be the last function.
+	
+7. In order to get an input from a html page, i.e a post request, we need the bodyParser.
+	- We import the bodyParser with "const bodyParser = require('body-parser');"
+	- We then use this as the first line of code (before all the middlewares):
+		+ app.use(bodyParser.urlencoded({extended: false}));
+		+ the .urlencoded({extended: false}) is some config that needs to be passed. no questions asked
+		+ We then do the following:
+			app.use('/product', (req, res, next) => {
+				console.log(req.body);
+				res.redirect('/');
+			});
 
 7. It is better to compartmentalize the app.
+8. a different syntax to export
+9. pug, ejs and handlebars -unp install --save pug ejs express-handlebars
+	- app.set()
+		-> views and view engine
+	- pug:
+		-> comes in built in support for express
+		-> pug syntax and res.render() method

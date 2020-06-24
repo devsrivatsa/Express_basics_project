@@ -1,21 +1,16 @@
-const path = require('path');
-const rootDirectory = require('../helper functions/path');
 var express = require('express');
 const router = express.Router();
+const adminController = require('../controllers/admin');
 
-const products = [];
+// get and post requests on the add-product page
+router.get('/add-product', adminController.getAddProducts);
+router.post('/add-product', adminController.postAddproducts);
 
-router.get('/add-product', (req, res, next) => {
-    res.render('add-product', {pageTitle: 'Add Product', path: '/admin/add-product' })
-});
+// get admin-products page
+router.get('/products', adminController.getProducts);
 
-// this is a post request and it is getting whatever we filled out in app-products.html page
-router.post('/add-product', (req, res, next) => {
-    products.push({title: req.body.title})
-    res.redirect('/');
-});
+// get and post requests on the edit-product page
+router.get('/edit-product', adminController.getEditProduct);
+router.post('/edit-product', adminController.postEditProduct);
 
-// module.exports = router;
-// A different syntax for exporting
 exports.routes = router;
-exports.products = products;

@@ -39,3 +39,22 @@
 	- pug:
 		-> comes in built in support for express
 		-> pug syntax and res.render() method
+		-> pug is a pain in the ass
+	- handlebars:
+		-> unlike pug this is not build in, so we should import it.
+		-> app.engine() method
+		-> .hbs extention
+		-> handlebars syntax
+		-> how the products array is dynamically routed
+		-> layouts
+
+10. MVC:
+	- controller:
+		-> the folder structure
+		-> products controller
+		-> the new export syntax
+	- model:
+		-> folder structure
+		-> creating a class for model
+		-> using the class to move input into the array and store it
+		-> replacing array with a file

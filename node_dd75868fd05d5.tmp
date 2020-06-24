@@ -1,0 +1,25 @@
+var express = require('express');
+const expressHbs = require('express-handlebars')
+var bodyparser = require('body-parser');
+const path = require('path');
+const rootDirectory = require('./helper functions/path')
+
+const adminRoutes = require('./routes/admin');
+const shopRoutes = require('./routes/shop');
+const errorsController = require('./controllers/errors');
+
+var app = express()
+// set global config
+app.set('view engine', 'ejs');
+app.set('views', 'views');
+// body parser must come before all the other middleware
+app.use(bodyparser.urlencoded({extended: false}));
+//linking all our static files
+app.use(express.static(path.join(__dirname, 'public')));
+
+app.use('/admin', adminRoutes.routes)
+app.use(shopRoutes);
+
+app.use(errorsController.four_o_four);
+
+app.listen(3000);

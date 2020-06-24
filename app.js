@@ -1,39 +1,35 @@
 var express = require('express');
-const expressHbs = require('express-handlebars')
 var bodyparser = require('body-parser');
 const path = require('path');
 const rootDirectory = require('./helper functions/path')
 
-const adminData = require('./routes/admin');
-const shopRoute = require('./routes/shop');
+const adminRoutes = require('./routes/admin');
+const shopRoutes = require('./routes/shop');
+const errorsController = require('./controllers/errors');
 
+const db = require('./util/database');
+
+// testing code for retriving items from db
+// db.execute('SELECT * FROM products')
+// .then(result => {
+//     console.log(result);
+// })
+// .catch(err => {
+//     console.log(err);
+// });
 
 var app = express()
 // set global config
 app.set('view engine', 'ejs');
 app.set('views', 'views');
-
 // body parser must come before all the other middleware
 app.use(bodyparser.urlencoded({extended: false}));
-
 //linking all our static files
 app.use(express.static(path.join(__dirname, 'public')));
 
-// filtering the path with the /admin
-//without the function call t0 adminRoutes but again order matters
-// app.use('/admin', adminRoutes); 
-app.use('/admin', adminData.routes)
-app.use(shopRoute);
+app.use('/admin', adminRoutes.routes)
+app.use('',shopRoutes.routes);
 
-// to send a 404 error we use res.status
-// app.use((req, res, next)=>{
-//     //This is one oway of doing it
-//     // res.status(404).sendFile(path.join(__dirname, 'views', 'page_not_found.html'));
-//     res.status(404).sendFile(path.join(rootDirectory, 'views', '404.html'));
-// });
-
-app.use((req, res, next) => {
-    res.status(404).render('404', {pageTitle: ':('});
-});
+app.use(errorsController.four_o_four);
 
 app.listen(3000);

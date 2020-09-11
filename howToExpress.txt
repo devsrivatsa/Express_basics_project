@@ -34,8 +34,6 @@
 7. It is better to compartmentalize the app.
 8. a different syntax to export
 9. pug, ejs and handlebars -unp install --save pug ejs express-handlebars
-	- app.set()
-		-> views and view engine
 	- pug:
 		-> comes in built in support for express
 		-> pug syntax and res.render() method
@@ -47,14 +45,137 @@
 		-> handlebars syntax
 		-> how the products array is dynamically routed
 		-> layouts
+	- ejs:
+		-> we should install ejs with npm install --save ejs
+	- app.set()
+		-> We should set the view engine that we are using (pug/handlebars/ejs) using the app.set('view engine', 'ejs');
+		-> We should then specify where the views are located - which is the views folder -> app.set('views', 'views');
 
 10. MVC:
 	- controller:
-		-> the folder structure
-		-> products controller
-		-> the new export syntax
+		-> controller is responsible for redirecting the user to specific pages.
+		-> Each logical segment of the website such as proucts or admin or shop should have its own controller file.
+			--> Ex: The shop segment will have a shop.js in the controllers folder.
+			--> This .js file will contain all methods pertaining to the shop such a method to get products, to get a specific product, get cart etc..
+			--> since we need to export multiple methods from this file we will use the following syntax:
+				---> exports.<method Name> = (req, res, next) => {}
+				---> Example: exports.getCart = (req, res, next) => {
+									res.render('shop/cart',
+									{
+										path: '/cart',
+										pageTitle: 'Your Cart',
+										selectedItems: selected_items
+									});
+								}
+				---> the RHS part of the function is just same as the app.use() function except that there is no path variable.
+			--> This entire controller will be imported into another shop.js file in the routes folder where the individual methods defined in the controller will be associated with a specific path.
+	- routes:
+		-> routes is basically part of the controller.
+		-> Similar to the controller, different .js files will be created within the routes for the logical segments of the website.
+		-> Example: there will be a shop.js inside the routes folder which will contain functions that map different paths to different controllers.
+		-> To do this we need the following exports:
+			--> const express = require('express');
+			--> const router = express.Router();
+			--> We then need to export the specific controller file: const shopController = require('../controllers/shop');
+		-> Then the function used is router.get() or router.post() which is similar to app.use() function.
+		-> Similar to .use, the first argument is the path, the second arg is the reference of the function that we defined in the controller.
+			--> Example: router.get('/products-list', shopController.getProducts);
+			--> Example 2: router.get('/product/:product_id', shopController.getProduct)
+			--> The "product_id" that comes after ":""is a variable. Whatever name we use here, must be defined and used in the controller function.
 	- model:
-		-> folder structure
-		-> creating a class for model
-		-> using the class to move input into the array and store it
-		-> replacing array with a file
+		-> The Model in node contains the way in which we define the database schema of the app.
+		-> Each logical portion of the app can contain its own model if necessary. Example: we can have a moedl for product that defines how a product is saved in the db. We can also have a database for cart items if necessary.
+		-> The models folder should contain one .js file for each model that we create. Ex: here we have product.js file.
+		-> Along with the database schema, the .js file will also contain methods that are relevant for that model like saving or reretriving products.
+		-> If we use a database(which all real world applications use), then we should import the database into the model.
+		-> To create a model, we crate a class: say "Product".
+		-> In the constructor of the class, we should define the schema.
+		-> Apart from that, we aso have methods in the Product class that allows us to interact with the db.
+		
+------------------------------incomplete------------------------------------------
+----------------------------------------------------------------------------------
+
+11. Using SQL Database:
+	- First, we install mysql server in our PC (including the workbench)
+	- We then create a new schema for our course and a table - "products" with relevant fields(easily done using the mysql workbench)
+	- Then we install mysql2 by npm install --save msql2
+	- In order to connect the database with the backend, we must first create a file, say - "database.js" inside our helper functions folder.
+	- This file will have the database configurations.
+		+ In this folder, we should first import mysql2:
+			-> const db = require('mysql2');
+		+ We will need to connect to our database for every crud operation that we perform. 
+		+ Therefore, instead of making a single connection everytime, we can make a pool of connections by using the pool object from mysql2.
+		+ we do this by:
+			const pool = msql.createPool({
+				host: 'localhost',
+				user: 'root',
+				database: 'nodejscomplete',
+				password: '1234'
+			});
+		+ The password and username are ones which we used for creating a database. The username is usually 'root' and the password is 'password'.
+		+ the 'database' is the schema name, and the host is our localhost.
+		+ Then we will export this via promises: 
+			-> module.exports = pool.promise();
+	- Once we do this, we should import the database.js into our app.js folder to use it there.
+	- it is easy to execute sql code inside express by:
+		+ db.execute('SELECT * FROM products')
+	- we can store the output in a result and console log it to see the output. We use promises instead of callbacks for structured code.
+		+ db.execute('SELECT * FROM products')
+			.then(result => {
+				console.log(result);
+			})
+			.catch(err => {
+				console.log(err);
+			});
+			
+12. Using Sequelize: Sequelize is a javascript library that allows us to use javascript instead of plain SQL.
+	- First we install it: npm install --save sequelize
+	- In the database.js file inside the helper functions folder, we then import it and create a sequelize object. We should then export the sequelize object.
+	- The sequelize object contains all the configurations of the database that we created with the mysql workbench.
+		+ we do this by:
+			const Sequelize = require('sequelize');
+			const sequelize = new Sequelize('nodejscomplete','root','1234', {dialect: 'mysql', host: 'localhost'});
+			module.exports = sequelize;
+		+ 'nodejscomplete' is the name of the database,'root' is the username,'1234' is the password.
+	
+	- Now we modify the Models created.
+		+ With sequalize, we do not need to create a class for creating a model. 
+		+ We have 5 fields in the model - id, title, price, imageUrl, and description. We specify these fields and configure them with the sequelize object that we created in the database.js file.
+		+ Therefore we import it: const sequelize_db = require('../helper functions/database');
+		+ We also need the sequelize module to use some of its classes: const Sequelize = require('sequelize');
+		+ Now we define the schema: const <schema name(title case)> = sequelize_db.define(<schema name>, {
+																											<field1>:{<config>},
+																											<field2>:{<config>},
+																											<field3>:{<config>}
+																										})
+			-> Example:
+				const Product = sequelize_db.define('Product', {
+																  id: {
+																	type: Sequelize.INTEGER,
+																	autoIncrement: true,
+																	allowNull: false,
+																	primaryKey: true
+																  },
+																  title: Sequelize.STRING,
+																  price: {
+																	type: Sequelize.DOUBLE,
+																	allowNull: false
+																  },
+																  imageUrl: {
+																	type: Sequelize.STRING,
+																	allowNull: false
+																  },
+																  description: {
+																	type: Sequelize.STRING,
+																	allowNull: false
+																  }
+																}
+													);
+		+ We then export this model: module.exports = Product;
+		
+	- Now we have add products, retrive products, edit products, and delete products. We do this with the inbuild methods that come with sequalize.
+		+ For this, we import Product model in the controller that we want.
+			-> Example: we have a getProducts method in the shop.js controller in which we need to get all products.
+			-> This is done with the findAll() method that comes inbuilt with sequelize.
+				
+

@@ -8,21 +8,17 @@
                 <% for(let product of prods) { %>
                     <article class="card roduct-item">
                         <header class="card__header">
-                            <h1 class="product__title"><%= product[0] %></h1>
+                            <h1 class="product__title"><%= product.title %></h1>
                         </header>
                         <div class="card__image">
-                            <img src="<%= product[1]%>" alt="<%= product[0] %>" height="100px" width="100px">
+                            <img src="<%= product.imageUrl%>" alt="<%= product.title %>">
                         </div>
                         <div class="card__content">
-                            <h2 class="product_price">$<%= product[2] %></h2>
-                            <p class="product__description"><%= product[3] %></p>
+                            <h2 class="product_price">$<%= product.price %></h2>
+                            <p class="product__description"><%= product.description %></p>
                         </div>
                         <div class="card__actions">
-                            <a class="btn" href ="/products/<%= product.id %>">Details</a>
-                            <form action="/add-to-cart" method="post">
-                                <button class="btn">Add to Cart</button>
-                            </form>
-                            
+                            <a class="btn" href ="/product/<%= product.id %>">Details</a>
                         </div>
                     </article>
                 <% } %>

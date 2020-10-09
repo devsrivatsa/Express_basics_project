@@ -38,8 +38,12 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(errorsController.four_o_four);
 
 
-mongoClient(client => {
-    console.log(client);
+//since we are not returning the client anymore
+// mongoClient(client => {
+//     console.log(client);
+//     app.listen(3000);
+// });
+
+mongoClient(() => {
     app.listen(3000);
 });
-

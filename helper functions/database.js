@@ -1,21 +1,13 @@
-//1. without sequalize
+const mongodb = require('mongodb');
+const MongoClient = mongodb.MongoClient;
 
-// const mysql = require('mysql2');
+const mongoConnect = (callback) => {
+    MongoClient.connect('mongodb+srv://srivatsa:<MongoDBpassword@123>@cluster0.shpla.gcp.mongodb.net/<dbname>?retryWrites=true&w=majority')
+    .then(client => {
+        console.log('Connected!!!');
+        callback(client);
+    })
+    .catch(err => console.log(err));
+};
 
-// const pool = mysql.createPool({
-//     host: 'localhost',
-//     user: 'root',
-//     database: 'nodejscomplete',
-//     password: '1234'
-// });
-
-// module.exports = pool.promise();
-
-
-
-
-//2. with sequalize
-const Sequelize = require('sequelize');
-const sequelize = new Sequelize('nodejscomplete','root','1234', {dialect: 'mysql', host: 'localhost'});
-
-module.exports = sequelize;
+module.exports = mongoConnect;

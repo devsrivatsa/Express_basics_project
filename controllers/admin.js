@@ -88,22 +88,19 @@ exports.postEditProduct = (req, res, next) => {
     });   
 } 
 
-// //controller to delete products page in admin products page
-// exports.postDeleteProduct = (req, res, next) => {
-//     const prodId = req.body.productId;
-//     Product.findByPk(prodId)
-//     .then(product => {
-//         return product.destroy();
-//     })
-//     .then(result => {
-//         console.log("Product destroyed!!!!");
-//         res.redirect("/admin/products");
-//     })
-//     .catch(err => {
-//         console.log(err);
-//     });
+//controller to delete products page in admin products page
+exports.postDeleteProduct = (req, res, next) => {
+    const prodId = req.body.product_id;    
+    Product.deleteById(prodId)
+    .then(result => {
+        console.log("Product destroyed!!!!");
+        res.redirect("/admin/products");
+    })
+    .catch(err => {
+        console.log(err);
+    });
 
-// }
+}
 
 
 //controller to view products page in admin

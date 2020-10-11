@@ -14,6 +14,6 @@ router.get('/edit-product/:product_id', adminController.getEditProduct);
 router.post('/edit-product', adminController.postEditProduct);
 
 // post route for deleting the item
-// router.post('/delete-product', adminController.postDeleteProduct);
+router.post('/delete-product', adminController.postDeleteProduct);
 
 exports.routes = router;

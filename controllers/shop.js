@@ -1,27 +1,12 @@
 const Product = require('../models/product');
-const Cart = require('../models/cart');
+// const Cart = require('../models/cart');
 const selected_items = [];
 
-// The fetch all function does not return anything. Only the callback inside the function returns the array
+
 exports.getProducts = (req, res, next) => {
-    // 1. without sequelize
 
-    // Product.fetchAll()
-    // .then(([products, fieldData]) => {
-    //     res.render('shop/product-list', 
-    //     {
-    //         prods: products, 
-    //         pageTitle: 'All Products', 
-    //         path:'/product-list'
-    //     })
-    // })
-    // .catch(err => {
-    //     console.log(err);
-    // });
-
-
-    // 2. with sequelize
-    Product.findAll()
+    // this is the same implementation as that of sequelize but instead of findAll, we change the name to fetchAll 
+    Product.fetchAll()
     .then(products => {
         res.render('shop/product-list', 
         {
@@ -53,32 +38,32 @@ exports.getProduct = (req, res, next) => {
     // });
 
     // 2. with sequelize
-    Product.findAll({where: {id: prodId }})
-    .then(products => {
-        res.render('shop/product-detail', {
-            product: products[0],
-            pageTitle: products[0].title,
-            path:'/product/:product_id'
-        });
-    })
-    .catch(err => {
-        console.log(err);
-    });
-
-    // 2. with sequelize method 2 - sequelize has a findById method that returns the searched object
-
-    // Product.findById(product_id)
-    // .then(product => {
-    //     console.log(item);
+    // Product.findAll({where: {id: prodId }})
+    // .then(products => {
     //     res.render('shop/product-detail', {
-    //         product: product,
-    //         pageTitle: product.title,
+    //         product: products[0],
+    //         pageTitle: products[0].title,
     //         path:'/product/:product_id'
     //     });
     // })
     // .catch(err => {
-    //     console.log(err)
+    //     console.log(err);
     // });
+
+    // 2. this is the same implementation as that of sequelize to return a single product
+    Product.findById(product_id)
+    .then(product => {
+        // console.log(product);
+        // console.log('product found!');
+        res.render('shop/product-detail', {
+            product: product,
+            pageTitle: product.title,
+            path:'/product/:_id'
+        });
+    })
+    .catch(err => {
+        console.log(err)
+    });
 
 }
 
@@ -98,8 +83,8 @@ exports.getIndex = (req, res, next) => {
     //     console.log(err);
     // });
 
-    //2. With sequelize
-    Product.findAll()
+    //same impleentation as that of sequelize. method name changed to fetchAll instead of findAll
+    Product.fetchAll()
     .then(products => {
         res.render('shop/index', 
         {
@@ -113,34 +98,34 @@ exports.getIndex = (req, res, next) => {
     });
 }
 
-exports.getCart = (req, res, next) => {
+// exports.getCart = (req, res, next) => {
     // res.render('shop/cart',
     // {
     //     path: '/cart',
     //     pageTitle: 'Your Cart',
     //     selectedItems: selected_items
     // });
-    req.user.getCart()
-    .then(cart => {
-        return cart.getProducts()
-        .then(products => {
-            console.log(products[0].CartItem);
-            res.render('shop/cart', {
-                path: '/cart',
-                pageTitle: 'Your Cart',
-                products: products
-            });
-        })
-        .catch(err => console.log(err));
-    })
-    .catch(err => console.log(err));
+//     req.user.getCart()
+//     .then(cart => {
+//         return cart.getProducts()
+//         .then(products => {
+//             console.log(products[0].CartItem);
+//             res.render('shop/cart', {
+//                 path: '/cart',
+//                 pageTitle: 'Your Cart',
+//                 products: products
+//             });
+//         })
+//         .catch(err => console.log(err));
+//     })
+//     .catch(err => console.log(err));
 
-}
+// }
 
-exports.postCart = (req, res, next) => {
-    prodId = req.body.productId;
-    let fetchedcart;
-    let newQuantity;
+// exports.postCart = (req, res, next) => {
+//     prodId = req.body.productId;
+//     let fetchedcart;
+//     let newQuantity;
     //method 1 - with sequelize
     
     // Product.findByPk(id)
@@ -157,65 +142,65 @@ exports.postCart = (req, res, next) => {
 
     //method 2 -  using the req.user object
 
-    req.user.getCart()
-    .then(cart => {
-        fetchedcart = cart;
-        return cart.getProducts({where: {id: prodId}});
-    })
-    .then(products => {
-        let product;
-        if(products.length > 0) {
-            product = products[0];
-        }
-        if (product) {
-            let oldQuantity = product.quantity;
-            if(!oldQuantity){
-                oldQuantity = 1;
-            }
-            newQuantity = oldQuantity + 1;
-            return product;
-        }
-        return Product.findByPk(prodId)
-        .then(product => {
-            return fetchedcart.addProduct(product, {through: {quantity: newQuantity}});
-        })
-    })
-    .then(() => {
-        res.redirect('/cart');
-    })
-    .catch(err => console.log(err));
-}
+//     req.user.getCart()
+//     .then(cart => {
+//         fetchedcart = cart;
+//         return cart.getProducts({where: {id: prodId}});
+//     })
+//     .then(products => {
+//         let product;
+//         if(products.length > 0) {
+//             product = products[0];
+//         }
+//         if (product) {
+//             let oldQuantity = product.quantity;
+//             if(!oldQuantity){
+//                 oldQuantity = 1;
+//             }
+//             newQuantity = oldQuantity + 1;
+//             return product;
+//         }
+//         return Product.findByPk(prodId)
+//         .then(product => {
+//             return fetchedcart.addProduct(product, {through: {quantity: newQuantity}});
+//         })
+//     })
+//     .then(() => {
+//         res.redirect('/cart');
+//     })
+//     .catch(err => console.log(err));
+// }
 
 
-exports.postDeleteProductCart = (req, res, next) => {
-    const prodId = req.body.productId;
-    req.user.getCart()
-    .then(cart => {
-        return cart.getProducts({where: {id: prodId}});
-    })
-    .then(products => {
-        const product = products[0];
-        return product.CartItem.destroy();
-    })
-    .then(result => {
-        res.redirect('/cart');
-    })
-    .catch(err => console.log(err));
-};
+// exports.postDeleteProductCart = (req, res, next) => {
+//     const prodId = req.body.productId;
+//     req.user.getCart()
+//     .then(cart => {
+//         return cart.getProducts({where: {id: prodId}});
+//     })
+//     .then(products => {
+//         const product = products[0];
+//         return product.CartItem.destroy();
+//     })
+//     .then(result => {
+//         res.redirect('/cart');
+//     })
+//     .catch(err => console.log(err));
+// };
 
-exports.getOrders = (req, res, next) => {
-    res.render('shop/orders', 
-    {
-        pageTitle: 'My Orders',
-        path: '/orders'
-    });
-}
+// exports.getOrders = (req, res, next) => {
+//     res.render('shop/orders', 
+//     {
+//         pageTitle: 'My Orders',
+//         path: '/orders'
+//     });
+// }
 
 
-exports.getCheckout = (req, res, next) => {
-    res.render('shop/checkout', 
-    {
-        pageTitle: 'Checkout Page',
-        path: '/checkout'
-    });
-}
+// exports.getCheckout = (req, res, next) => {
+//     res.render('shop/checkout', 
+//     {
+//         pageTitle: 'Checkout Page',
+//         path: '/checkout'
+//     });
+// }

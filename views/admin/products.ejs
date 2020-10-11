@@ -1,4 +1,5 @@
 <%- include('../includes/head.ejs') %>
+<link rel="stylesheet" href="/css/product.css">
 </head>
 <body>
     <%- include('../includes/navigation.ejs') %>
@@ -11,12 +12,11 @@
                             <h1 class="product__title"><%= product.title %></h1>
                         </header>
                         <div class="card__actions">
-                            <form action="/admin/edit-product/<%=product.id%>?edit=true" method="get">
-                                <button type="submit" class="btn">Edit</button>
+                            <a href="/admin/edit-product/<%= product._id %>?edit=true" class="btn">Edit</a>
                             </form>
-                            <form action="/admin/delete-product" method="post">
+                            <form action="/admin/delete-product" method="POST">
                                 <button type="submit" class="btn">Delete</button>
-                                <input type="hidden" name="productId" value="<%=product.id%>">
+                                <input type="hidden" name="product_id" value="<%=product._id%>">
                             </form>
                         </div>
                     </article>

@@ -3,9 +3,9 @@ var bodyparser = require('body-parser');
 const path = require('path');
 const rootDirectory = require('./helper functions/path')
 
-// commenting out the routes to avoid error for time being
+
 const adminRoutes = require('./routes/admin');
-// const shopRoutes = require('./routes/shop');
+const shopRoutes = require('./routes/shop'); //uncommenting 
 const errorsController = require('./controllers/errors');
 
 const mongoConnect = require('./helper functions/database').mongoConnect;
@@ -32,18 +32,11 @@ app.use((req, res, next) => {
     next();
 });
 
-// commenting out the routes to avoid error for time being
 app.use('/admin', adminRoutes.routes)
-// app.use('',shopRoutes.routes);
+app.use('',shopRoutes.routes); //uncommenting 
 
 app.use(errorsController.four_o_four);
 
-
-//since we are not returning the client anymore
-// mongoClient(client => {
-//     console.log(client);
-//     app.listen(3000);
-// });
 
 mongoConnect();
 app.listen(3000);

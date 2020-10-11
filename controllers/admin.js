@@ -38,36 +38,40 @@ exports.postAddproducts = (req, res, next) => {
 }
 
 
-//controller to view edit-product page
-// exports.getEditProduct = (req, res, next) => {
-//     const editMode = req.query.edit;
-//     if (!editMode) {
-//         return res.redirect('/');
-//     }
-//     const prodId = req.params.productId;
-//     // without having to get the product specific to user
-//     // Product.findByPk(prodId)
+//// controller to view edit-product page
+exports.getEditProduct = (req, res, next) => {
+    const editMode = req.query.edit;
+    const prodId = req.params.product_id;
+    console.log(editMode);
+    // if (editMode !== 'true') {
+    //     return res.redirect('/');
+    // }
+    
+    // without having to get the product specific to user
+    // Product.findByPk(prodId)
 
-//     /*getting products specifc to user. But this method returns an array instead of the product unlike findByPk.
-//     Therefore we want to get get the product from the products array */
-//     req.user.getProducts({where: {id: prodId}})
-//     .then(products => {
-//         const product = products[0];
-//         if (!product) {
-//             return res.redirect('/');
-//         }
-//         res.render('admin/edit-product', {
-//             pageTitle: 'Edit-Product',
-//             path: 'admin/edit-product',
-//             editing: editMode,
-//             product: product
-//         });
-//     })
-//     .catch(err => {
-//         console.log(err);
-//     });
+    /*getting products specifc to user. But this method returns an array instead of the product unlike findByPk.
+    Therefore we want to get get the product from the products array */
+    // req.user.getProducts({where: {id: prodId}}) //since this wont work currently in mongodb implementation
+    Product.findById(prodId)
+    // .then(product => {
+        // const product = products[0]; //the returned item is not an array anymore
+        .then(product => {
+            if (!product) {
+                return res.redirect('/');
+            }
+            return res.render('admin/edit-product', {
+                pageTitle: 'Edit-Product',
+                path: 'admin/edit-product',
+                editing: editMode,
+                product: product
+        });
+    })
+    .catch(err => {
+        console.log(err);
+    });
 
-// }
+}
 
 //controller to send post request on edit-product page
 // exports.postEditProduct = (req, res, next) => {
@@ -113,18 +117,19 @@ exports.postAddproducts = (req, res, next) => {
 
 
 //controller to view products page in admin
-// exports.getAdminProducts = (req, res, next) => {
-//     //getting all products for specific user
-//     req.user.getProducts()
-//     .then(products => {
-//         res.render('admin/products', {
-//             prods: products, 
-//             pageTitle: 'Admin Products', 
-//             path:'/admin/products'
-//         });
-//     })
-//     .catch(err => {
-//         console.log(err);
-//     });
-// }
+exports.getAdminProducts = (req, res, next) => {
+    //getting all products for specific user
+    // req.user.getProducts() //this will not work
+    Product.fetchAll()
+    .then(products => {
+        res.render('admin/products', {
+            prods: products, 
+            pageTitle: 'Admin Products', 
+            path:'/admin/products'
+        });
+    })
+    .catch(err => {
+        console.log(err);
+    });
+}
 

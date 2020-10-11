@@ -1,4 +1,4 @@
-// using an array instead of a file
+const mongodb = require('mongodb')
 const Product = require('../models/product');
 
 // controller to view add-product page
@@ -43,20 +43,8 @@ exports.getEditProduct = (req, res, next) => {
     const editMode = req.query.edit;
     const prodId = req.params.product_id;
     console.log(editMode);
-    // if (editMode !== 'true') {
-    //     return res.redirect('/');
-    // }
-    
-    // without having to get the product specific to user
-    // Product.findByPk(prodId)
-
-    /*getting products specifc to user. But this method returns an array instead of the product unlike findByPk.
-    Therefore we want to get get the product from the products array */
-    // req.user.getProducts({where: {id: prodId}}) //since this wont work currently in mongodb implementation
     Product.findById(prodId)
-    // .then(product => {
-        // const product = products[0]; //the returned item is not an array anymore
-        .then(product => {
+           .then(product => {
             if (!product) {
                 return res.redirect('/');
             }
@@ -73,30 +61,32 @@ exports.getEditProduct = (req, res, next) => {
 
 }
 
-//controller to send post request on edit-product page
-// exports.postEditProduct = (req, res, next) => {
-//     const prodId = req.body.productId;
-//     const updatedTitle = req.body.title;
-//     const updatedImageUrl = req.body.imageUrl;
-//     const updatedPrice = req.body.price;
-//     const updatedDescription = req.body.description;
-//     Product.findByPk(prodId)
-//     .then(product => {
-//         console.log(req.body);
-//         product.title = updatedTitle;
-//         product.price = updatedPrice;
-//         product.imageUrl = updatedImageUrl;
-//         product.description = updatedDescription;
-//         return product.save();
-//     })
-//     .then(result => {
-//         console.log('Updated Product!!!!!');
-//         res.redirect('/admin/products');
-//     })
-//     .catch(err => {
-//         console.log(err);
-//     });   
-// } 
+//// controller to send post request on edit-product page
+exports.postEditProduct = (req, res, next) => {
+    const prodId = req.body.product_id;
+    const updatedTitle = req.body.title;
+    const updatedImageUrl = req.body.imageUrl;
+    const updatedPrice = req.body.price;
+    const updatedDescription = req.body.description;
+    Product.findById(prodId)
+    .then(productData => {
+        const product = new Product(
+            updatedTitle, 
+            updatedPrice, 
+            updatedDescription, 
+            updatedImageUrl, 
+            new mongodb.ObjectId(prodId)
+            )
+        return product.save();
+    })
+    .then(result => {
+        console.log('Updated Product!!!!!');
+        res.redirect('/admin/products');
+    })
+    .catch(err => {
+        console.log(err);
+    });   
+} 
 
 // //controller to delete products page in admin products page
 // exports.postDeleteProduct = (req, res, next) => {

@@ -3,38 +3,23 @@ const Product = require('../models/product');
 
 // controller to view add-product page
 exports.getAddProducts = (req, res, next) => {
-    res.render('admin/add-product', {pageTitle: 'Add Product', path: '/admin/add-product', editing: false })
+    res.render('admin/add-product', {pageTitle: 'Add Product', path: '/admin/add-product', editing: false, isAuthenticated: req.isLoggedIn })
 }
 // controller to send post request on add-product page
 exports.postAddproducts = (req, res, next) => {
-    const title = req.body.title
-    const imageUrl = req.body.imageUrl
-    const price = req.body.price
-    const description = req.body.description
-    
+    const title = req.body.title;
+    const imageUrl = req.body.imageUrl;
+    const price = req.body.price;
+    const description = req.body.description;
+    const userId = req.user._id;
     // for mongodb, we create a product obj
-    const product = new Product(title, price, description, imageUrl)
+    const product = new Product(title, price, description, imageUrl, null, userId)
     product.save()
     .then(result => {
         console.log('created product!!');
         res.redirect('/admin/products');
     })
     .catch(err => console.log(err));
-
-    // 3. More elegant way to create a product and associate a user is - But not working
-    // req.user.createProduct({
-    //             title: title,
-    //             price: price,
-    //             imageUrl: imageUrl,
-    //             description: description
-    //         })
-    //         .then(result => {
-    //         console.log(result);
-    //         res.redirect("/admin/products");
-    //     })
-    //     .catch(err => {
-    //         console.log(err);
-    //     });
 }
 
 
@@ -52,7 +37,8 @@ exports.getEditProduct = (req, res, next) => {
                 pageTitle: 'Edit-Product',
                 path: 'admin/edit-product',
                 editing: editMode,
-                product: product
+                product: product,
+                isAuthenticated: req.isLoggedIn
         });
     })
     .catch(err => {
@@ -112,7 +98,8 @@ exports.getAdminProducts = (req, res, next) => {
         res.render('admin/products', {
             prods: products, 
             pageTitle: 'Admin Products', 
-            path:'/admin/products'
+            path:'/admin/products',
+            isAuthenticated: req.isLoggedIn
         });
     })
     .catch(err => {

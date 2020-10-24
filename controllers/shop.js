@@ -43,7 +43,7 @@ exports.getIndex = (req, res, next) => {
             prods: products, 
             pageTitle: 'List of our Products', 
             path:'/',
-            isAuthenticated: req.isLoggedIn
+            isAuthenticated: req.session.isLoggedIn
         })
     })
     .catch(err => {

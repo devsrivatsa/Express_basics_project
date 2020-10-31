@@ -44,16 +44,34 @@ app.use(
  
 
 //attaching the dummy user to the request
+// app.use((req, res, next) => {
+//     User.findById('5f8a1729ce339af98508bb69')
+//     .then(user => {
+//         req.user = new User(user.username, user.email, user.cart, user._id);
+//         next();
+//     })
+//     .catch(err => {
+//         console.log(err);
+//     });
+// });
+
+/* the req.session.user is only storing the data in the database and not the User object 
+oppsed to how the req.user can store the user object itself. Therefore, when we retrive the req.sesion.user object, 
+we will not have access to the methods of the User class. So, we create a middleware 
+that retrives the req.session.user._id and stores the User object in the req.user */
 app.use((req, res, next) => {
-    User.findById('5f8a1729ce339af98508bb69')
+    if (!req.session.user) { // if user is not logged in, do not execute this middleware
+        return next();
+    }
+    User.findById(req.session.user._id)
     .then(user => {
         req.user = new User(user.username, user.email, user.cart, user._id);
         next();
     })
-    .catch(err => {
-        console.log(err);
-    });
+    .catch(err => console.log(err));
 });
+
+
 
 app.use('/admin', adminRoutes.routes)
 app.use('',shopRoutes.routes);

@@ -3,7 +3,13 @@ const Product = require('../models/product');
 
 // controller to view add-product page
 exports.getAddProducts = (req, res, next) => {
-    res.render('admin/add-product', {pageTitle: 'Add Product', path: '/admin/add-product', editing: false, isAuthenticated: req.isLoggedIn })
+    res.render('admin/add-product', 
+    {
+        pageTitle: 'Add Product',
+        path: '/admin/add-product',
+        editing: false,
+        isAuthenticated: req.session.isLoggedIn 
+    })
 }
 // controller to send post request on add-product page
 exports.postAddproducts = (req, res, next) => {
@@ -38,7 +44,7 @@ exports.getEditProduct = (req, res, next) => {
                 path: 'admin/edit-product',
                 editing: editMode,
                 product: product,
-                isAuthenticated: req.isLoggedIn
+                isAuthenticated: req.session.isLoggedIn
         });
     })
     .catch(err => {
@@ -92,14 +98,14 @@ exports.postDeleteProduct = (req, res, next) => {
 //controller to view products page in admin
 exports.getAdminProducts = (req, res, next) => {
     //getting all products for specific user
-    // req.user.getProducts() //this will not work
+    // req.session.user.getProducts() //this will not work
     Product.fetchAll()
     .then(products => {
         res.render('admin/products', {
             prods: products, 
             pageTitle: 'Admin Products', 
             path:'/admin/products',
-            isAuthenticated: req.isLoggedIn
+            isAuthenticated: req.session.isLoggedIn
         });
     })
     .catch(err => {

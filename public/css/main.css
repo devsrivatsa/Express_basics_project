@@ -122,3 +122,18 @@ main {
   background-color: #00695c;
   color: white;
 }
+
+.user-message {
+  margin: auto;
+  width: 90%;
+  border: 1px solid #4771fa;
+  padding: 1rem;
+  border-radius: 3px;
+  background: #abb7df;
+  text-align: center;
+}
+.user-message--error {
+  border-color: red;
+  background: rgb(219, 154, 154);
+  color: rgb(155, 5, 5);
+}

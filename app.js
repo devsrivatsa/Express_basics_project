@@ -8,6 +8,11 @@ const MongoDBStore = require('connect-mongodb-session')(session);
 const path = require('path');
 const rootDirectory = require('./helper functions/path')
 
+//csrf
+const csurf = require('csurf');
+
+//flash error messages
+const flash = require('connect-flash');
 
 const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop'); //uncommenting 
@@ -24,6 +29,8 @@ const store = new MongoDBStore({
     uri: MONGODB_URI,
     collection: 'sessions'
 });
+
+const csrfProtection = csurf()
 
 // set views config
 app.set('view engine', 'ejs');
@@ -42,6 +49,9 @@ app.use(
         store: store
     }));
  
+app.use(csrfProtection); // only generates the csrf token
+
+app.use(flash()); // flash error messages.
 
 //attaching the dummy user to the request
 // app.use((req, res, next) => {
@@ -65,13 +75,18 @@ app.use((req, res, next) => {
     }
     User.findById(req.session.user._id)
     .then(user => {
-        req.user = new User(user.username, user.email, user.cart, user._id);
+        req.user = new User(user.email, user.password, user.cart, user._id);
         next();
     })
     .catch(err => console.log(err));
 });
 
-
+// setting the isAuthenticated and csrf token through locals variable:
+app.use((req, res, next) => {
+    res.locals.isAuthenticated = req.session.isLoggedIn;
+    res.locals.csrfToken = req.csrfToken()
+    next();
+});
 
 app.use('/admin', adminRoutes.routes)
 app.use('',shopRoutes.routes);

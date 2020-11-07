@@ -12,9 +12,14 @@
             
             <% if (! isAuthenticated ) { %>
             <li class="main-header__item"><a class="<%= path === '/login' ? 'active':'inactive' %>" href="/login">Login</a></li>
-            <!-- <li class="main-header__item"><form action="/logout" method="POST"><button type="submit">Logout</button></form></li> -->
+            <li class="main-header__item"><a class="<%= path === '/signup' ? 'active':'inactive' %>" href="/signup">Signup</a></li>
             <% } else { %>
-            <li class="main-header__item"><form action="/logout" method="POST"><button class="btn" type="submit">Logout</button></form></li>
+            <li class="main-header__item">
+                <form action="/logout" method="POST">
+                    <button class="btn" type="submit">Logout</button>
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                </form>
+            </li>
             <% } %>
         </ul>
     </nav>

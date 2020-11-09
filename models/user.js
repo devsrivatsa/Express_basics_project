@@ -1,3 +1,4 @@
+const { closeDelimiter } = require('ejs');
 const mongodb = require('mongodb');
 const getDb = require('../helper functions/database').getDb;
 
@@ -7,6 +8,8 @@ class User {
         this.password = password;
         this.cart = cart;
         this._id = id;
+        this.resetToken = "";
+        this.resetTokenExpiration = "";
     }
 
     save() {
@@ -125,6 +128,51 @@ class User {
 
     }
 
+    static findByResetToken(token) {
+        const db = getDb();
+        return db
+        .collection('users')
+        .findOne({
+            resetToken : token
+         //,resetTokenExpiration: { $gt: Date.now() }
+        })
+        .then(user => {
+            return user;
+        })
+        .catch(err => console.log(err));
+    }
+
+    static updateResetTokenAndDate(id, token) {
+        const db = getDb();
+        return db
+        .collection('users')
+        .updateOne({_id:id}, {$set: {
+            resetToken : token,
+            resetTokenExpiration : Date.now() + 3600000*2
+        }})
+        .then(result => {
+            console.log('user token updated')
+        })
+        .catch(err => {
+            console.log(err);
+        })
+    }
+
+    static updatePassword(token, newPassword) { 
+        const db = getDb();
+        return db.collection('users')
+        .updateOne(
+            {resetToken: token}, 
+            {$set : 
+                {
+                    password: newPassword,
+                    resetToken: undefined,
+                    resetTokenExpiration: undefined
+                }
+            }
+        )
+        
+    }
 
 }
 

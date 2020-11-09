@@ -33,8 +33,8 @@ exports.postAddproducts = (req, res, next) => {
 exports.getEditProduct = (req, res, next) => {
     const editMode = req.query.edit;
     const prodId = req.params.product_id;
-    console.log(editMode);
-    Product.findById(prodId)
+    const userId = req.user._id;
+    Product.findById(prodId, userId)
            .then(product => {
             if (!product) {
                 return res.redirect('/');
@@ -56,18 +56,20 @@ exports.getEditProduct = (req, res, next) => {
 //// controller to send post request on edit-product page
 exports.postEditProduct = (req, res, next) => {
     const prodId = req.body.product_id;
+    const userId = req.user._id;
     const updatedTitle = req.body.title;
     const updatedImageUrl = req.body.imageUrl;
     const updatedPrice = req.body.price;
     const updatedDescription = req.body.description;
-    Product.findById(prodId)
+    Product.findById(prodId, userId)
     .then(productData => {
         const product = new Product(
             updatedTitle, 
             updatedPrice, 
             updatedDescription, 
             updatedImageUrl, 
-            new mongodb.ObjectId(prodId)
+            new mongodb.ObjectId(prodId),
+            new mongodb.ObjectId(userId)
             )
         return product.save();
     })
@@ -81,9 +83,8 @@ exports.postEditProduct = (req, res, next) => {
 } 
 
 //controller to delete products page in admin products page
-exports.postDeleteProduct = (req, res, next) => {
-    const prodId = req.body.product_id;    
-    Product.deleteById(prodId)
+exports.postDeleteProduct = (req, res, next) => {    
+    Product.deleteById(req.body.product_id, req.user._id)
     .then(result => {
         console.log("Product destroyed!!!!");
         res.redirect("/admin/products");
@@ -95,11 +96,10 @@ exports.postDeleteProduct = (req, res, next) => {
 }
 
 
-//controller to view products page in admin
+//controller to view user products page in admin
 exports.getAdminProducts = (req, res, next) => {
-    //getting all products for specific user
-    // req.session.user.getProducts() //this will not work
-    Product.fetchAll()
+
+    Product.fetchProductForUser(req.user._id)
     .then(products => {
         res.render('admin/products', {
             prods: products, 

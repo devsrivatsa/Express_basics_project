@@ -42,11 +42,11 @@ class Product {
     .catch(err => console.log(err));
   }
 
-  static findById(prodId) {
+  static findById(prodId, userId) {
     const db = getDb();
     return db
     .collection('products')
-    .find({_id: new mongodb.ObjectID(prodId)})
+    .find({_id: new mongodb.ObjectID(prodId), userId: new mongodb.ObjectId(userId)})
     .next()
     .then(product => {
       return product;
@@ -54,11 +54,23 @@ class Product {
     .catch(err => console.log(err));
   }
 
-  static deleteById(prodId) {
+  static fetchProductForUser(userId) {
     const db = getDb();
     return db
     .collection('products')
-    .deleteOne({_id: new mongodb.ObjectId(prodId)})
+    .find({userId: new mongodb.ObjectId(userId)})
+    .toArray()
+    .then(products => {
+      return products;
+    })
+    .catch(err => console.log(err));
+  }
+
+  static deleteById(prodId, userId) {
+    const db = getDb();
+    return db
+    .collection('products')
+    .deleteOne({_id: new mongodb.ObjectId(prodId), userId: new mongodb.ObjectId(userId)})
     .then(result => {
       console.log(`item with ID: ${mongodb.ObjectId(prodId)} has been deleted.`);
     })

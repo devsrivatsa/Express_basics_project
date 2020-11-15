@@ -25,7 +25,12 @@ exports.postAddproducts = (req, res, next) => {
         console.log('created product!!');
         res.redirect('/admin/products');
     })
-    .catch(err => console.log(err));
+    .catch(err => {
+        // console.log(err)
+        const error = new Error(err);
+        error.httpSttusCode = 500;
+        next(error);
+    });
 }
 
 
@@ -48,7 +53,10 @@ exports.getEditProduct = (req, res, next) => {
         });
     })
     .catch(err => {
-        console.log(err);
+        // console.log(err);
+        const error = new Error(err);
+        error.httpSttusCode = 500;
+        next(error);
     });
 
 }
@@ -78,11 +86,14 @@ exports.postEditProduct = (req, res, next) => {
         res.redirect('/admin/products');
     })
     .catch(err => {
-        console.log(err);
+        // console.log(err);
+        const error = new Error(err);
+        error.httpSttusCode = 500;
+        next(error);
     });   
 } 
 
-//controller to delete products page in admin products page
+// controller to delete products page in admin products page
 exports.postDeleteProduct = (req, res, next) => {    
     Product.deleteById(req.body.product_id, req.user._id)
     .then(result => {
@@ -90,10 +101,27 @@ exports.postDeleteProduct = (req, res, next) => {
         res.redirect("/admin/products");
     })
     .catch(err => {
-        console.log(err);
+        // console.log(err);
+        const error = new Error(err);
+        error.httpSttusCode = 500;
+        next(error);
     });
 
 }
+
+//async delete controller
+// exports.DeleteProduct = (req, res, next) => {
+//     //delete requests are not allowed to have req.body so we use req.params to get the product_id    
+//     Product.deleteById(req.params.product_id, req.user._id)
+//     .then(result => {
+//         console.log("Product destroyed!!!!");
+//         res.status(200).json()
+//     })
+//     .catch(err => {
+//         console.log(err);
+//     });
+
+// }
 
 
 //controller to view user products page in admin
@@ -109,7 +137,10 @@ exports.getAdminProducts = (req, res, next) => {
         });
     })
     .catch(err => {
-        console.log(err);
+        // console.log(err);
+        const error = new Error(err);
+        error.httpSttusCode = 500;
+        next(error);
     });
 }
 

@@ -21,4 +21,6 @@ router.post('/edit-product', isAuth, adminController.postEditProduct);
 // post route for deleting the item
 router.post('/delete-product', isAuth, adminController.postDeleteProduct);
 
+//async delete
+// router.delete('/product/:product_id', isAuth, adminController.DeleteProduct);
 exports.routes = router;

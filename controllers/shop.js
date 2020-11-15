@@ -14,7 +14,10 @@ exports.getProducts = (req, res, next) => {
         })
     })
     .catch(err => {
-        console.log(err);
+        // console.log(err);
+        const error = new Error(err);
+        error.httpSttusCode = 500;
+        next(error);
     });
 }
 
@@ -30,7 +33,10 @@ exports.getProduct = (req, res, next) => {
         });
     })
     .catch(err => {
-        console.log(err)
+        // console.log(err)
+        const error = new Error(err);
+        error.httpSttusCode = 500;
+        next(error);
     });
 
 }
@@ -47,7 +53,10 @@ exports.getIndex = (req, res, next) => {
         })
     })
     .catch(err => {
-        console.log(err);
+        // console.log(err);
+        const error = new Error(err);
+        error.httpSttusCode = 500;
+        next(error);
     });
 }
 
@@ -61,7 +70,12 @@ exports.getCart = (req, res, next) => {
             isAuthenticated: req.session.isLoggedIn
         });
     })
-    .catch(err => console.log(err));
+    .catch(err => {
+        // console.log(err);
+        const error = new Error(err);
+        error.httpSttusCode = 500;
+        next(error);
+    });
 }
 
 
@@ -74,7 +88,12 @@ exports.postCart = (req, res, next) => {
             console.log("Added product to cart");
             res.redirect('/cart');
         })
-        .catch(err => console.log(err))
+        .catch(err => {
+            // console.log(err)
+            const error = new Error(err);
+            error.httpSttusCode = 500;
+            next(error);
+        });
     });
 }
 

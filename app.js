@@ -53,6 +53,13 @@ app.use(csrfProtection); // only generates the csrf token
 
 app.use(flash()); // flash error messages.
 
+// setting the  csrf token through locals variable:
+app.use((req, res, next) => {
+    res.locals.csrfToken = req.csrfToken()
+    res.locals.isAuthenticated = req.session.isLoggedIn;
+    next();
+});
+
 //attaching the dummy user to the request
 // app.use((req, res, next) => {
 //     User.findById('5f8a1729ce339af98508bb69')
@@ -78,20 +85,22 @@ app.use((req, res, next) => {
         req.user = new User(user.email, user.password, user.cart, user._id);
         next();
     })
-    .catch(err => console.log(err));
+    .catch(err => {
+        // console.log(err);
+        next(new Error(err));
+    });
 });
 
-// setting the isAuthenticated and csrf token through locals variable:
-app.use((req, res, next) => {
-    res.locals.isAuthenticated = req.session.isLoggedIn;
-    res.locals.csrfToken = req.csrfToken()
-    next();
-});
+
 
 app.use('/admin', adminRoutes.routes)
 app.use('',shopRoutes.routes);
 app.use(authRoutes);
 app.use(errorsController.four_o_four);
+
+app.use((error, req, res, next) => {
+    res.redirect('/500');
+})
 
 
 mongoConnect();

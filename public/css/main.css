@@ -137,3 +137,7 @@ main {
   background: rgb(219, 154, 154);
   color: rgb(155, 5, 5);
 }
+
+.form-control input.invalid {
+  border-color: red;
+}

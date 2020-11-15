@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 const sendgridTransport = require('nodemailer-sendgrid-transport');
-
+const { validationResult } = require('express-validator/check');
 
 const User = require('../models/user');
 
@@ -25,7 +25,7 @@ exports.getLogin = (req, res, next) => {
 
     // the req.flash('error') seems to be an empty array if there is no error. We want it to be null.
     let message = req.flash('error');
-    console.log(message);
+    // console.log(message);
     if (message.length > 0) {
         message = message[0];
     } else {
@@ -65,7 +65,10 @@ exports.postLogin = (req, res, next) => {
         })
     })
     .catch(err => {
-        console.log(err);
+        // console.log(err);
+        const error = new Error(err);
+        error.httpSttusCode = 500;
+        next(error);
     });
 
 } 
@@ -82,7 +85,9 @@ exports.getSignup = (req, res, next) => {
     res.render('auth/signup', {
         path: '/signup',
         pageTitle: 'Signup',
-        errorMessage: req.flash().length > 0 ? req.flash()[0] : null
+        errorMessage: req.flash().length > 0 ? req.flash()[0] : null,
+        oldInput: "",
+        validationErrors: []
     })
 }
 
@@ -90,22 +95,33 @@ exports.postSignup = (req, res, next) => {
     const email = req.body.email;
     const password = req.body.password;
     const confirmPassword = req.body.confirmPassword;
-    User.findByEmail(email)
-    .then(userDoc => {
-        if (userDoc) {
-            req.flash('error', 'Email already exists. Please pick a different one.')
-            return res.redirect('/signup')
-        }
-        return bcrypt
-        .hash(password, 12)
-        .then(hashedPassword => {
-            const user = new User(
-                email, 
-                hashedPassword, 
-                {items: []}
-            )
-            return user.save()
-        })
+
+    //validation......................................................................................
+    // collecting errors posted by check middleware
+    const errors = validationResult(req);
+    // if there are errors, the re-render the signup page again 
+    if (!errors.isEmpty()) {
+        return res.status(422).render('auth/signup', {
+            path: '/signup',
+            pageTitle: 'Signup',
+            errorMessage: errors.array()[0].msg, // returns the array of results
+            oldInput: {email:email, password:password, confirmPassword:confirmPassword},
+            validationErrors: errors.array()
+        });
+    }
+    //.................................................................................................
+
+    // we are relying on the validator middleware for validating whether the email exists or not.
+    // Hence we can start with bcrypting the password.
+    bcrypt
+    .hash(password, 12)
+    .then(hashedPassword => {
+        const user = new User(
+            email, 
+            hashedPassword, 
+            {items: []}
+        )
+        return user.save()
     })
     .then(result => {
         res.redirect('/login');
@@ -115,15 +131,14 @@ exports.postSignup = (req, res, next) => {
             from: 'srivatsastudy@gmail.com',
             subject: 'LearnNodeJs SignUp Succeeded!!',
             html: '<h1>You have successfully signed up!</h1>'
-        })
-        .catch(err => {
-            console.log(err);
-        })
-        
+        });
     })
     .catch(err => {
-        console.log(err);
-    })
+        // console.log(err);
+        const error = new Error(err);
+        error.httpSttusCode = 500;
+        next(error);
+    });
 }
 
 
@@ -179,7 +194,10 @@ exports.postReset = (req, res, next) => {
             res.redirect('/login');
         })
         .catch(err => {
-            console.log(err); 
+            // console.log(err); 
+            const error = new Error(err);
+            error.httpSttusCode = 500;
+            next(error);
         });
 
     });
@@ -220,7 +238,10 @@ exports.postNewPassword = (req, res, next) => {
         return res.redirect('/login');
     })
     .catch(err => {
-        console.log(err);
+        // console.log(err);
+        const error = new Error(err);
+        error.httpSttusCode = 500;
+        next(error);
     })
 
 }

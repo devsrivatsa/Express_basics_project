@@ -15,6 +15,7 @@ const csurf = require('csurf');
 const flash = require('connect-flash');
 
 const multer = require('multer');
+const hash = require('random-hash');
 
 const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop'); //uncommenting 
@@ -44,11 +45,16 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // middleware to extract image
 const fileStorage = multer.diskStorage({
+    // destination: (req, file, callback) => { //this is storing the file in the images folder
+    //     callback(null, 'Images');
     destination: (req, file, callback) => { //this is storing the file in the images folder
-        callback(null, 'Images');
+        callback(null, path.join(__dirname, '/Images'));
     },
+
     filename: (req, file, callback) => { //this is just setting a unique filename
-        callback(null, new Date().toISOString() + '-' + file.originalname);
+        let temp = file.originalname.split('.');
+        const filename = temp[0] + '-' + hash.generateHash({length: 5}) + '.' + temp[1]
+        callback(null, filename);
     }
 })
 // function to filter file types

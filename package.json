@@ -27,6 +27,7 @@
     "nodemailer-sendgrid-transport": "^0.2.0",
     "nodemon": "^2.0.6",
     "pug": "^3.0.0",
+    "random-hash": "^4.0.1",
     "sequelize": "^6.3.3"
   },
   "type": "module"

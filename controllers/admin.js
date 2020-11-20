@@ -32,6 +32,7 @@ exports.postAddproducts = (req, res, next) => {
             errorMessage: 'Attached file is not valid'
         });
     }
+    console.log("Image: ",image);
     // for mongodb, we create a product obj
     const product = new Product(title, price, description, image, false, userId)
     product.save()

@@ -4,11 +4,11 @@ const getDb = require('../helper functions/database').getDb;
 const ITEMS_PER_PAGE = 1;
 
 class Product {
-  constructor(title, price, description, image, id, userId) {
+  constructor(title, price, description, imageUrl, id, userId) {
     this.title = title;
     this.price = price;
     this.description = description;
-    this.image = image;
+    this.imageUrl = imageUrl;
     this._id = id ? new mongodb.ObjectId(id) : null; //fixing the add product functionality
     this.userId = userId;
   }
@@ -31,11 +31,6 @@ class Product {
     .catch(err => console.log(err));
   }
 
-
-  getItemCount() {
-    const db = getDb();
-    return 
-  }
 
 
   static fetchAll(pageNumber) {

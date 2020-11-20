@@ -14,7 +14,7 @@ exports.getAddProducts = (req, res, next) => {
 // controller to send post request on add-product page
 exports.postAddproducts = (req, res, next) => {
     const title = req.body.title;
-    const image = req.file;
+    const image = req.file; //this will save the file in the req obj
     const price = req.body.price;
     const description = req.body.description;
     const userId = req.user._id;
@@ -32,9 +32,10 @@ exports.postAddproducts = (req, res, next) => {
             errorMessage: 'Attached file is not valid'
         });
     }
-    console.log("Image: ",image);
+    console.log(image);
+    const imageUrl = '/Images/' + image.filename;
     // for mongodb, we create a product obj
-    const product = new Product(title, price, description, image, false, userId)
+    const product = new Product(title, price, description, imageUrl, false, userId)
     product.save()
     .then(result => {
         console.log('created product!!');
@@ -59,16 +60,17 @@ exports.getEditProduct = (req, res, next) => {
             if (!product) {
                 return res.redirect('/');
             }
+            // console.log(product);
             return res.render('admin/edit-product', {
                 pageTitle: 'Edit-Product',
                 path: 'admin/edit-product',
                 editing: editMode,
                 product: product,
-                isAuthenticated: req.session.isLoggedIn
+                errorMessage: null
         });
     })
     .catch(err => {
-        // console.log(err);
+        console.log(err);
         const error = new Error(err);
         error.httpSttusCode = 500;
         next(error);
@@ -101,7 +103,7 @@ exports.postEditProduct = (req, res, next) => {
         res.redirect('/admin/products');
     })
     .catch(err => {
-        // console.log(err);
+        console.log(err);
         const error = new Error(err);
         error.httpSttusCode = 500;
         next(error);
@@ -116,7 +118,7 @@ exports.postEditProduct = (req, res, next) => {
 //         res.redirect("/admin/products");
 //     })
 //     .catch(err => {
-//         // console.log(err);
+//         console.log(err);
 //         const error = new Error(err);
 //         error.httpSttusCode = 500;
 //         next(error);
@@ -153,7 +155,7 @@ exports.getAdminProducts = (req, res, next) => {
         });
     })
     .catch(err => {
-        // console.log(err);
+        console.log(err);
         const error = new Error(err);
         error.httpSttusCode = 500;
         next(error);

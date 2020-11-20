@@ -18,7 +18,7 @@
                             <!-- <button type="submit" class="btn">Delete</button> -->
                             <input type="hidden" name="product_id" value="<%=product._id%>">
                             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                            <button type="buttn" class="btn" onclick="deleteProduct(this)">Delete</button>
+                            <button type="button" class="btn" onclick=deleteProductAsync(this)>Delete</button>
                             <!-- </form> -->
                         </div>
                     </article>
@@ -29,4 +29,4 @@
         <% } %>
     </main>
 <%- include('../includes/end.ejs') %>
-<script src="../../public/js/admin.js"></script>
+<script src="/js/admin.js"></script>

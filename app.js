@@ -42,11 +42,10 @@ app.set('views', 'views');
 app.use(bodyparser.urlencoded({extended: false}));
 //linking all our static files
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/Images', express.static(path.join(__dirname, 'Images')));
 
 // middleware to extract image
 const fileStorage = multer.diskStorage({
-    // destination: (req, file, callback) => { //this is storing the file in the images folder
-    //     callback(null, 'Images');
     destination: (req, file, callback) => { //this is storing the file in the images folder
         callback(null, path.join(__dirname, '/Images'));
     },

@@ -14,6 +14,8 @@ const csurf = require('csurf');
 //flash error messages
 const flash = require('connect-flash');
 
+const multer = require('multer');
+
 const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop'); //uncommenting 
 const authRoutes = require('./routes/auth');
@@ -40,6 +42,31 @@ app.use(bodyparser.urlencoded({extended: false}));
 //linking all our static files
 app.use(express.static(path.join(__dirname, 'public')));
 
+// middleware to extract image
+const fileStorage = multer.diskStorage({
+    destination: (req, file, callback) => { //this is storing the file in the images folder
+        callback(null, 'Images');
+    },
+    filename: (req, file, callback) => { //this is just setting a unique filename
+        callback(null, new Date().toISOString() + '-' + file.originalname);
+    }
+})
+// function to filter file types
+const fileFilter = (req, file, callback) => {
+    if (
+        file.mimetype == 'image/png' ||
+        file.mimetype == 'image/jpg' ||
+        file.mimetype == 'image/jpeg'
+    ) {
+        callback(null, true);
+    } else {
+        callback(null, false);
+    }
+}
+
+//'single' indicates that we will only receive a single image input
+//'image' because the name of the input field that receives image input is 'image'
+app.use(multer({storage: fileStorage, fileFilter: fileFilter}).single('image'));
 // defining the session middleware
 app.use(
     session({ 
@@ -99,8 +126,9 @@ app.use(authRoutes);
 app.use(errorsController.four_o_four);
 
 app.use((error, req, res, next) => {
+    console.log(error);
     res.redirect('/500');
-})
+});
 
 
 mongoConnect();

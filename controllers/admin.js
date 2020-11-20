@@ -14,12 +14,26 @@ exports.getAddProducts = (req, res, next) => {
 // controller to send post request on add-product page
 exports.postAddproducts = (req, res, next) => {
     const title = req.body.title;
-    const imageUrl = req.body.imageUrl;
+    const image = req.file;
     const price = req.body.price;
     const description = req.body.description;
     const userId = req.user._id;
+    if(!image) {
+        return res.render('admin/edit-product',
+        {
+            pageTitle: 'Add-Product',
+            path: 'admin/edit-product',
+            editing: true,
+            product: {
+                title: title,
+                price: price,
+                description: description
+            },
+            errorMessage: 'Attached file is not valid'
+        });
+    }
     // for mongodb, we create a product obj
-    const product = new Product(title, price, description, imageUrl, null, userId)
+    const product = new Product(title, price, description, image, false, userId)
     product.save()
     .then(result => {
         console.log('created product!!');
@@ -94,34 +108,35 @@ exports.postEditProduct = (req, res, next) => {
 } 
 
 // controller to delete products page in admin products page
-exports.postDeleteProduct = (req, res, next) => {    
-    Product.deleteById(req.body.product_id, req.user._id)
-    .then(result => {
-        console.log("Product destroyed!!!!");
-        res.redirect("/admin/products");
-    })
-    .catch(err => {
-        // console.log(err);
-        const error = new Error(err);
-        error.httpSttusCode = 500;
-        next(error);
-    });
-
-}
-
-//async delete controller
-// exports.DeleteProduct = (req, res, next) => {
-//     //delete requests are not allowed to have req.body so we use req.params to get the product_id    
-//     Product.deleteById(req.params.product_id, req.user._id)
+// exports.postDeleteProduct = (req, res, next) => {    
+//     Product.deleteById(req.body.product_id, req.user._id)
 //     .then(result => {
 //         console.log("Product destroyed!!!!");
-//         res.status(200).json()
+//         res.redirect("/admin/products");
 //     })
 //     .catch(err => {
-//         console.log(err);
+//         // console.log(err);
+//         const error = new Error(err);
+//         error.httpSttusCode = 500;
+//         next(error);
 //     });
 
 // }
+
+// async delete controller
+exports.DeleteProduct = (req, res, next) => {
+    //delete requests are not allowed to have req.body so we use req.params to get the product_id    
+    Product.deleteById(req.params.product_id, req.user._id)
+    .then(result => {
+        console.log("Product destroyed!!!!");
+        res.status(200).json()
+    })
+    .catch(err => {
+        res.status(500).json();
+        console.log(err);
+    });
+
+}
 
 
 //controller to view user products page in admin

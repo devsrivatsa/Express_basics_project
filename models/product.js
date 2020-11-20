@@ -1,13 +1,14 @@
 // with mongo db
 const mongodb = require('mongodb');
 const getDb = require('../helper functions/database').getDb;
+const ITEMS_PER_PAGE = 1;
 
 class Product {
-  constructor(title, price, description, imageurl, id, userId) {
+  constructor(title, price, description, image, id, userId) {
     this.title = title;
     this.price = price;
     this.description = description;
-    this.imageurl = imageurl;
+    this.image = image;
     this._id = id ? new mongodb.ObjectId(id) : null; //fixing the add product functionality
     this.userId = userId;
   }
@@ -30,16 +31,29 @@ class Product {
     .catch(err => console.log(err));
   }
 
-  static fetchAll() {
+
+  getItemCount() {
+    const db = getDb();
+    return 
+  }
+
+
+  static fetchAll(pageNumber) {
     const db = getDb();
     return db
     .collection('products')
-    .find()
-    .toArray()
-    .then(products => {
-      return products;
-    })
-    .catch(err => console.log(err));
+    .countDocuments()
+    .then(count => {
+      return db
+      .collection('products')
+      .find()
+      .skip((pageNumber-1)*ITEMS_PER_PAGE)
+      .limit(ITEMS_PER_PAGE)
+      .toArray()
+      .then(products => {
+        return [count, products];
+      })
+    }).catch(err => console.log(err));
   }
 
   static findById(prodId, userId) {
@@ -58,7 +72,7 @@ class Product {
     const db = getDb();
     return db
     .collection('products')
-    .find({userId: new mongodb.ObjectId(userId)})
+    .find({userId: userId})
     .toArray()
     .then(products => {
       return products;
@@ -78,4 +92,4 @@ class Product {
   }
 
 }
-module.exports = Product;
+module.exports = Product; 

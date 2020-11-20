@@ -1,16 +1,26 @@
 const Product = require('../models/product');
 const selected_items = [];
-
+const ITEMS_PER_PAGE = 1;
 
 exports.getProducts = (req, res, next) => {
-    Product.fetchAll()
-    .then(products => {
+    const pageNumber = Number(req.query.page) || 1;
+    Product.fetchAll(pageNumber)
+    .then(arr => {
         res.render('shop/product-list', 
         {
-            prods: products, 
+            prods: arr[1], 
             pageTitle: 'All Products', 
             path:'/product-list',
-            isAuthenticated: req.session.isLoggedIn
+            isAuthenticated: req.session.isLoggedIn,
+            pageDetails: {
+                productCount: Number(arr[0]),
+                currentPage: pageNumber,
+                hasNextPage: Number(arr[0]) - pageNumber > 0,
+                nextPage: pageNumber + 1,
+                hasPreviousPage: pageNumber > 1,
+                previousPage: pageNumber - 1,
+                lastPage: Math.ceil(Number(arr[0])/ITEMS_PER_PAGE)
+            }
         })
     })
     .catch(err => {
@@ -41,22 +51,36 @@ exports.getProduct = (req, res, next) => {
 
 }
 
+
 exports.getIndex = (req, res, next) => {
-    Product.fetchAll()
-    .then(products => {
+    const pageNumber = Number(req.query.page) || 1;
+    Product.fetchAll(pageNumber)
+    .then(arr => {
+        //pagination assist:
+        // console.log((pageNumber - 1), (pageNumber > 1), pageNumber, (Number(arr[0]) - pageNumber > 0), (pageNumber + 1),Math.ceil(Number(arr[0])/ITEMS_PER_PAGE));
         res.render('shop/index', 
-        {
-            prods: products, 
-            pageTitle: 'List of our Products', 
-            path:'/',
-            isAuthenticated: req.session.isLoggedIn
-        })
+            {
+                prods: arr[1],
+                pageTitle: 'List of our Products', 
+                path:'/',
+                isAuthenticated: req.session.isLoggedIn,
+                pageDetails: {
+                    productCount: Number(arr[0]),
+                    currentPage: pageNumber,
+                    hasNextPage: Number(arr[0]) - pageNumber > 0,
+                    nextPage: pageNumber + 1,
+                    hasPreviousPage: pageNumber > 1,
+                    previousPage: pageNumber - 1,
+                    lastPage: Math.ceil(Number(arr[0])/ITEMS_PER_PAGE)
+                }
+            }
+        )
     })
     .catch(err => {
-        // console.log(err);
-        const error = new Error(err);
-        error.httpSttusCode = 500;
-        next(error);
+        console.log(err);
+        // const error = new Error(err);
+        // error.httpSttusCode = 500;
+        // next(error);
     });
 }
 
